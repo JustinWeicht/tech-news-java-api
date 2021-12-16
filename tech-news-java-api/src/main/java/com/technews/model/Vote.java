@@ -10,17 +10,23 @@ import java.util.Objects;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "vote")
 public class Vote implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private String userId;
-    private String postId;
+    private Integer userId;
+    private Integer postId;
 
     public Vote() {
     }
 
-    public Vote(Integer id, String userId, String postId) {
+    public Vote(Integer id, Integer userId, Integer postId) {
         this.id = id;
+        this.userId = userId;
+        this.postId = postId;
+    }
+
+    public Vote(Integer userId, Integer postId) {
         this.userId = userId;
         this.postId = postId;
     }
@@ -33,19 +39,19 @@ public class Vote implements Serializable {
         this.id = id;
     }
 
-    public String getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
-    public String getPostId() {
+    public Integer getPostId() {
         return postId;
     }
 
-    public void setPostId(String postId) {
+    public void setPostId(Integer postId) {
         this.postId = postId;
     }
 
@@ -54,7 +60,9 @@ public class Vote implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Vote)) return false;
         Vote vote = (Vote) o;
-        return Objects.equals(getId(), vote.getId()) && Objects.equals(getUserId(), vote.getUserId()) && Objects.equals(getPostId(), vote.getPostId());
+        return Objects.equals(getId(), vote.getId()) &&
+                Objects.equals(getUserId(), vote.getUserId()) &&
+                Objects.equals(getPostId(), vote.getPostId());
     }
 
     @Override
@@ -66,8 +74,8 @@ public class Vote implements Serializable {
     public String toString() {
         return "Vote{" +
                 "id=" + id +
-                ", userId='" + userId + '\'' +
-                ", postId='" + postId + '\'' +
+                ", userId=" + userId +
+                ", postId=" + postId +
                 '}';
     }
 }

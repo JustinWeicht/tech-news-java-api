@@ -10,17 +10,18 @@ import java.util.Objects;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "comment")
 public class Comment implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     private String commentText;
-    private String userId;
-    private String postId;
+    private Integer userId;
+    private Integer postId;
 
     public Comment() {
     }
 
-    public Comment(Integer id, String commentText, String userId, String postId) {
+    public Comment(Integer id, String commentText, Integer userId, Integer postId) {
         this.id = id;
         this.commentText = commentText;
         this.userId = userId;
@@ -43,19 +44,19 @@ public class Comment implements Serializable {
         this.commentText = commentText;
     }
 
-    public String getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
-    public String getPostId() {
+    public Integer getPostId() {
         return postId;
     }
 
-    public void setPostId(String postId) {
+    public void setPostId(Integer postId) {
         this.postId = postId;
     }
 
@@ -64,7 +65,10 @@ public class Comment implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Comment)) return false;
         Comment comment = (Comment) o;
-        return Objects.equals(getId(), comment.getId()) && Objects.equals(getCommentText(), comment.getCommentText()) && Objects.equals(getUserId(), comment.getUserId()) && Objects.equals(getPostId(), comment.getPostId());
+        return Objects.equals(getId(), comment.getId()) &&
+                Objects.equals(getCommentText(), comment.getCommentText()) &&
+                Objects.equals(getUserId(), comment.getUserId()) &&
+                Objects.equals(getPostId(), comment.getPostId());
     }
 
     @Override
@@ -77,8 +81,8 @@ public class Comment implements Serializable {
         return "Comment{" +
                 "id=" + id +
                 ", commentText='" + commentText + '\'' +
-                ", userId='" + userId + '\'' +
-                ", postId='" + postId + '\'' +
+                ", userId=" + userId +
+                ", postId=" + postId +
                 '}';
     }
 }

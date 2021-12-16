@@ -13,6 +13,7 @@ import java.util.Objects;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "post")
 public class Post implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -22,31 +23,32 @@ public class Post implements Serializable {
     private String userName;
     @Transient
     private int voteCount;
-    private Integer UserId;
+    private Integer userId;
+
     @NotNull
     @Temporal(TemporalType.DATE)
     @Column(name = "posted_at")
     private Date postedAt = new Date();
+
     @NotNull
     @Temporal(TemporalType.DATE)
     @Column(name = "updated_at")
     private Date updatedAt = new Date();
+
+    // Need to use FetchType.LAZY to resolve multiple bags exception
     @OneToMany(mappedBy = "postId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
-    public Post(Integer id, String title, String postUrl, String userName, int voteCount, Integer userId, Date postedAt, Date updatedAt, List<Comment> comments) {
+
+    public Post() {
+    }
+
+    public Post(Integer id, String title, String postUrl, int voteCount, Integer userId) {
         this.id = id;
         this.title = title;
         this.postUrl = postUrl;
-        this.userName = userName;
         this.voteCount = voteCount;
-        UserId = userId;
-        this.postedAt = postedAt;
-        this.updatedAt = updatedAt;
-        this.comments = comments;
-    }
-
-    public Post() {
+        this.userId = userId;
     }
 
     public Integer getId() {
@@ -90,11 +92,11 @@ public class Post implements Serializable {
     }
 
     public Integer getUserId() {
-        return UserId;
+        return userId;
     }
 
     public void setUserId(Integer userId) {
-        UserId = userId;
+        this.userId = userId;
     }
 
     public Date getPostedAt() {
@@ -126,11 +128,34 @@ public class Post implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Post)) return false;
         Post post = (Post) o;
-        return getVoteCount() == post.getVoteCount() && Objects.equals(getId(), post.getId()) && Objects.equals(getTitle(), post.getTitle()) && Objects.equals(getPostUrl(), post.getPostUrl()) && Objects.equals(getUserName(), post.getUserName()) && Objects.equals(getUserId(), post.getUserId()) && Objects.equals(getPostedAt(), post.getPostedAt()) && Objects.equals(getUpdatedAt(), post.getUpdatedAt()) && Objects.equals(getComments(), post.getComments());
+        return getVoteCount() == post.getVoteCount() &&
+                Objects.equals(getId(), post.getId()) &&
+                Objects.equals(getTitle(), post.getTitle()) &&
+                Objects.equals(getPostUrl(), post.getPostUrl()) &&
+                Objects.equals(getUserName(), post.getUserName()) &&
+                Objects.equals(getUserId(), post.getUserId()) &&
+                Objects.equals(getPostedAt(), post.getPostedAt()) &&
+                Objects.equals(getUpdatedAt(), post.getUpdatedAt()) &&
+                Objects.equals(getComments(), post.getComments());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getTitle(), getPostUrl(), getUserName(), getVoteCount(), getUserId(), getPostedAt(), getUpdatedAt(), getComments());
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", postUrl='" + postUrl + '\'' +
+                ", userName='" + userName + '\'' +
+                ", voteCount=" + voteCount +
+                ", userId=" + userId +
+                ", postedAt=" + postedAt +
+                ", updatedAt=" + updatedAt +
+                ", comments=" + comments +
+                '}';
     }
 }
