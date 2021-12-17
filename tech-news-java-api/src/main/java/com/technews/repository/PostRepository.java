@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
-    List<Post> findAllPosyByUserId(Integer id) throws Exception;
+    List<Post> findAllPostsByUserId(Integer id) throws Exception;
 }

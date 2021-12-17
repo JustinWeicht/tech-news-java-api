@@ -1,8 +1,8 @@
 package com.technews.controller;
 
+import com.technews.model.Comment;
 import com.technews.model.Post;
 import com.technews.model.User;
-import com.technews.model.Comment;
 import com.technews.repository.CommentRepository;
 import com.technews.repository.PostRepository;
 import com.technews.repository.UserRepository;
@@ -33,16 +33,18 @@ public class HomePageController {
 
     @GetMapping("/login")
     public String login(Model model, HttpServletRequest request) {
-        if(request.getSession(false) != null) {
+
+        if (request.getSession(false) != null) {
             return "redirect:/";
-        } else {
-            return "login";
         }
+
+        model.addAttribute("user", new User());
+        return "login";
     }
 
     @GetMapping("/users/logout")
     public String logout(HttpServletRequest request) {
-        if(request.getSession(false) != null) {
+        if (request.getSession(false) != null) {
             request.getSession().invalidate();
         }
         return "redirect:/login";
@@ -52,18 +54,19 @@ public class HomePageController {
     public String homepageSetup(Model model, HttpServletRequest request) {
         User sessionUser = new User();
 
-        if(request.getSession(false) != null) {
+        if (request.getSession(false) != null) {
             sessionUser = (User) request.getSession().getAttribute("SESSION_USER");
             model.addAttribute("loggedIn", sessionUser.isLoggedIn());
         } else {
             model.addAttribute("loggedIn", false);
         }
 
+
         List<Post> postList = postRepository.findAll();
-        for(Post p : postList) {
+        for (Post p : postList) {
             p.setVoteCount(voteRepository.countVotesByPostId(p.getId()));
             User user = userRepository.getOne(p.getUserId());
-            p.setUserName(p.getUserName());
+            p.setUserName(user.getUsername());
         }
 
         model.addAttribute("postList", postList);
@@ -140,7 +143,7 @@ public class HomePageController {
 
         Integer userId = sessionUser.getId();
 
-        List<Post> postList = postRepository.findAllPosyByUserId(userId);
+        List<Post> postList = postRepository.findAllPostsByUserId(userId);
         for (Post p : postList) {
             p.setVoteCount(voteRepository.countVotesByPostId(p.getId()));
             User user = userRepository.getOne(p.getUserId());

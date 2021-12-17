@@ -13,12 +13,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 public class TechNewsController {
@@ -27,17 +25,18 @@ public class TechNewsController {
     PostRepository postRepository;
 
     @Autowired
-    UserRepository userRepository;
+    VoteRepository voteRepository;
 
     @Autowired
-    VoteRepository voteRepository;
+    UserRepository userRepository;
 
     @Autowired
     CommentRepository commentRepository;
 
     @PostMapping("/users/login")
     public String login(@ModelAttribute User user, Model model, HttpServletRequest request) throws Exception {
-        if((user.getPassword().equals(null) || user.getPassword().isEmpty() || user.getEmail().equals(null) || user.getEmail().isEmpty())) {
+
+        if ((user.getPassword().equals(null) || user.getPassword().isEmpty()) || (user.getEmail().equals(null) || user.getPassword().isEmpty())) {
             model.addAttribute("notice", "Email address and password must be populated in order to login!");
             return "login";
         }
@@ -45,19 +44,19 @@ public class TechNewsController {
         User sessionUser = userRepository.findUserByEmail(user.getEmail());
 
         try {
-            if(sessionUser.equals(null)){
+            if (sessionUser.equals(null)) {
 
             }
-        } catch(NullPointerException e) {
-            model.addAttribute("notice", "Email address is not recognized.");
+        } catch (NullPointerException e) {
+            model.addAttribute("notice", "Email address is not recognized!");
             return "login";
         }
 
-        // Validate password
+        // Validate Password
         String sessionUserPassword = sessionUser.getPassword();
         boolean isPasswordValid = BCrypt.checkpw(user.getPassword(), sessionUserPassword);
         if(isPasswordValid == false) {
-            model.addAttribute("notice", "This password is not valid.");
+            model.addAttribute("notice", "Password is not valid!");
             return "login";
         }
 
@@ -70,8 +69,8 @@ public class TechNewsController {
     @PostMapping("/users")
     public String signup(@ModelAttribute User user, Model model, HttpServletRequest request) throws Exception {
 
-        if(user.getUsername().equals(null) || user.getUsername().isEmpty() || user.getEmail().equals(null) || user.getEmail().isEmpty() || user.getPassword().equals(null) || user.getPassword().isEmpty()) {
-            model.addAttribute("notice", "In order to sign up the username, email, and password must be populated!");
+        if ((user.getUsername().equals(null) || user.getUsername().isEmpty()) || (user.getPassword().equals(null) || user.getPassword().isEmpty()) || (user.getEmail().equals(null) || user.getPassword().isEmpty())) {
+            model.addAttribute("notice", "In order to signup username, email address and password must be populated!");
             return "login";
         }
 
@@ -79,19 +78,19 @@ public class TechNewsController {
             // Encrypt password
             user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
             userRepository.save(user);
-        } catch(DataIntegrityViolationException e) {
-            model.addAttribute("notice", "That email address is not available. Please enter a unique email address!");
+        } catch (DataIntegrityViolationException e) {
+            model.addAttribute("notice", "Email address is not available! Please choose a different unique email address.");
             return "login";
         }
 
         User sessionUser = userRepository.findUserByEmail(user.getEmail());
 
         try {
-            if(sessionUser.equals(null)) {
+            if (sessionUser.equals(null)) {
 
             }
-        } catch(NullPointerException e) {
-            model.addAttribute("notice", "User is not recognized.");
+        } catch (NullPointerException e) {
+            model.addAttribute("notice", "User is not recognized!");
             return "login";
         }
 
@@ -101,14 +100,14 @@ public class TechNewsController {
         return "redirect:/dashboard";
     }
 
-    @PostMapping("/post")
+    @PostMapping("/posts")
     public String addPostDashboardPage(@ModelAttribute Post post, Model model, HttpServletRequest request) {
 
-        if((post.getTitle().equals(null) || post.getTitle().isEmpty() || post.getPostUrl().equals(null) || post.getPostUrl().isEmpty())) {
+        if ((post.getTitle().equals(null) || post.getTitle().isEmpty()) || (post.getPostUrl().equals(null) || post.getPostUrl().isEmpty())) {
             return "redirect:/dashboardEmptyTitleAndLink";
         }
 
-        if(request.getSession(false) == null) {
+        if (request.getSession(false) == null) {
             return "redirect:/login";
         } else {
             User sessionUser = (User) request.getSession().getAttribute("SESSION_USER");
@@ -121,7 +120,8 @@ public class TechNewsController {
 
     @PostMapping("/posts/{id}")
     public String updatePostDashboardPage(@PathVariable int id, @ModelAttribute Post post, Model model, HttpServletRequest request) {
-        if(request.getSession(false) == null) {
+
+        if (request.getSession(false) == null) {
             model.addAttribute("user", new User());
             return "redirect/dashboard";
         } else {
@@ -134,17 +134,16 @@ public class TechNewsController {
     }
 
     @PostMapping("/comments")
-    public String createCommentsCommentPage(@ModelAttribute Comment comment, Model model, HttpServletRequest request) {
+    public String createCommentCommentsPage(@ModelAttribute Comment comment, Model model, HttpServletRequest request) {
 
-        if(comment.getCommentText().equals(null) || comment.getCommentText().isEmpty()) {
+        if (comment.getCommentText().isEmpty() || comment.getCommentText().equals(null)) {
             return "redirect:/singlePostEmptyComment/" + comment.getPostId();
         } else {
-            if(request.getSession(false) == null) {
+            if (request.getSession(false) != null) {
                 User sessionUser = (User) request.getSession().getAttribute("SESSION_USER");
                 comment.setUserId(sessionUser.getId());
                 commentRepository.save(comment);
-
-                return "redirect:/post" + comment.getPostId();
+                return "redirect:/post/" + comment.getPostId();
             } else {
                 return "login";
             }
@@ -154,10 +153,10 @@ public class TechNewsController {
     @PostMapping("/comments/edit")
     public String createCommentEditPage(@ModelAttribute Comment comment, HttpServletRequest request) {
 
-        if(comment.getCommentText().equals("") || comment.getCommentText().equals(null)) {
-            return "redirect:/editPostEmptyComment" + comment.getPostId();
+        if (comment.getCommentText().equals("") || comment.getCommentText().equals(null)) {
+            return "redirect:/editPostEmptyComment/" + comment.getPostId();
         } else {
-            if(request.getSession(false) != null) {
+            if (request.getSession(false) != null) {
                 User sessionUser = (User) request.getSession().getAttribute("SESSION_USER");
                 comment.setUserId(sessionUser.getId());
                 commentRepository.save(comment);
@@ -167,12 +166,13 @@ public class TechNewsController {
                 return "redirect:/login";
             }
         }
+
     }
 
-    @PostMapping("/posts/upvote")
-    public void addVotesCommentPage(@RequestBody Vote vote, HttpServletRequest request, HttpServletRequest response) {
+    @PutMapping("/posts/upvote")
+    public void addVoteCommentsPage(@RequestBody Vote vote, HttpServletRequest request, HttpServletResponse response) {
 
-        if(request.getSession(false) != null) {
+        if (request.getSession(false) != null) {
             Post returnPost = null;
             User sessionUser = (User) request.getSession().getAttribute("SESSION_USER");
             vote.setUserId(sessionUser.getId());
